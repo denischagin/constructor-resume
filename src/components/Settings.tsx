@@ -52,6 +52,7 @@ export const Settings: FC<SettingsProps> = (props) => {
       <Typography
         variant="h5"
         mb={3}
+        textAlign="right"
       >
         Настройка: {title}
       </Typography>
@@ -65,7 +66,7 @@ export const Settings: FC<SettingsProps> = (props) => {
           marks
           min={1}
           max={rowsAmount}
-          value={item.countHeight}
+          value={item.countHeight ?? 1}
           onChange={(_, newValue) => {
             onChangeItem(item.id, { countHeight: newValue as number })
           }}
@@ -80,7 +81,7 @@ export const Settings: FC<SettingsProps> = (props) => {
           marks
           min={1}
           max={itemsPerRow}
-          value={item.countWidth}
+          value={item.countWidth ?? 1}
           onChange={(_, newValue) => {
             onChangeItem(item.id, { countWidth: newValue as number })
           }}

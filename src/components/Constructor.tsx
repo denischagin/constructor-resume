@@ -6,6 +6,7 @@ import { DragItem } from '../types'
 import { getDefaultItems } from '../helpers/getDefaultItems'
 import { BackgroundGrid } from './BackgroundGrid'
 import { Settings } from './Settings'
+import { DraggableData, DraggableEvent } from 'react-draggable'
 
 export const Constructor = () => {
   const itemWidth = 100
@@ -84,6 +85,26 @@ export const Constructor = () => {
     setItemSettingsId((prev) => (prev === item.id ? undefined : item.id))
   }
 
+  const handleResize = (
+    item: DragItem,
+    _e: DraggableEvent,
+    data: DraggableData,
+  ) => {
+    const newCountWidth = (item.countWidth ?? 1) + data.deltaX / itemWidth
+    const newCountHeight = (item.countHeight ?? 1) + data.deltaY / itemHeight
+
+    changeItemValue(item.id, {
+      countWidth:
+        newCountWidth > 10 || newCountWidth < 1
+          ? item.countWidth
+          : newCountWidth,
+      countHeight:
+        newCountHeight > 10 || newCountHeight < 1
+          ? item.countHeight
+          : newCountHeight,
+    })
+  }
+
   return (
     <Box
       display="flex"
@@ -127,8 +148,11 @@ export const Constructor = () => {
                 handleDragStart(item)
               },
             }}
-            onToggleSettings={() => {
+            onClick={() => {
               handleToggleSettings(item)
+            }}
+            onResize={(...args) => {
+              handleResize(item, ...args)
             }}
             boxProps={{ sx: item.sx }}
             isActive={item.id === itemSettings?.id}

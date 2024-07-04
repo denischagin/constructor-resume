@@ -1,7 +1,10 @@
 import { Box, BoxProps } from '@mui/material'
 import { FC, PropsWithChildren, useState } from 'react'
-import Draggable, { DraggableProps } from 'react-draggable'
-import settingsIcon from '../assets/svg/settings-icon.svg'
+import Draggable, {
+  DraggableEventHandler,
+  DraggableProps,
+} from 'react-draggable'
+import resizeIcon from '../assets/svg/resize-icon.svg'
 
 export type DragElementProps = {
   itemWidth: number
@@ -12,8 +15,9 @@ export type DragElementProps = {
   draggableProps: Partial<DraggableProps>
   countWidth?: number
   countHeight?: number
-  onToggleSettings?: () => void
   isActive?: boolean
+  onClick?: () => void
+  onResize?: DraggableEventHandler
 } & PropsWithChildren
 
 export const DragElement: FC<DragElementProps> = (props) => {
@@ -27,18 +31,28 @@ export const DragElement: FC<DragElementProps> = (props) => {
     countWidth = 1,
     countHeight = 1,
     children,
-    onToggleSettings,
     isActive,
+    onClick,
+    onResize,
   } = props
   const { onStop, onStart, ...restDraggableProps } = draggableProps
 
   const [isDragging, setIsDragging] = useState(false)
 
+  const [isResizing, setIsResizing] = useState(false)
+  const [resizePosition, setResizePosition] = useState({ x: 0, y: 0 })
+
   const commonTransitions = [
     'background-color 300ms',
-    'height 300ms',
-    'width 300ms',
+    `height ${isResizing ? '100ms' : '300ms'}`,
+    `width ${isResizing ? '100ms' : '300ms'}`,
   ]
+  const transition = [
+    ...(!isDragging ? ['transform 300ms ease-in-out'] : []),
+    ...commonTransitions,
+  ].join(', ')
+
+  const resizeSize = '20px'
 
   return (
     <Draggable
@@ -46,14 +60,19 @@ export const DragElement: FC<DragElementProps> = (props) => {
         x,
         y,
       }}
-      cancel=".settings-icon"
+      cancel=".cancel"
       defaultClassName="element"
       onStop={(...args) => {
+        if (!isDragging) {
+          onClick && onClick()
+        }
         setIsDragging(false)
         onStop && onStop(...args)
       }}
-      onStart={(...args) => {
+      onDrag={() => {
         setIsDragging(true)
+      }}
+      onStart={(...args) => {
         onStart && onStart(...args)
       }}
       {...restDraggableProps}
@@ -69,48 +88,61 @@ export const DragElement: FC<DragElementProps> = (props) => {
         left={0}
         borderRadius="30px"
         bgcolor={
-          isActive ? 'rgba(201, 231, 255, 0.8)' : 'rgba(255, 255, 255, 0.8)'
+          isActive ? 'rgba(222, 240, 255, 0.8)' : 'rgba(255, 255, 255, 0.8)'
         }
+        onClick={() => {}}
         textAlign="center"
         boxShadow={2}
-        onDoubleClick={onToggleSettings}
-        style={{
-          transition: [
-            ...(!isDragging ? ['transform 300ms ease-in-out'] : []),
-            ...commonTransitions,
-          ].join(', '),
-        }}
         sx={{
+          transition,
+          cursor: isDragging ? 'move' : 'pointer',
           outline: isDragging
-            ? (theme) => `2px solid ${theme.palette.primary.main}`
+            ? (theme) => `2px dashed ${theme.palette.primary.main}`
             : '1px solid rgba(0, 0, 0, 0.6)',
-          cursor: 'grab',
-          '&:active': {
-            cursor: 'grabbing',
-          },
           ...sx,
         }}
         {...boxProps}
       >
-        <Box
-          position="absolute"
-          borderRadius="50%"
-          width="25px"
-          height="25px"
-          bottom={6}
-          right={6}
-          className="settings-icon"
-          sx={{
-            cursor: 'pointer',
+        <Draggable
+          position={{ ...resizePosition }}
+          onDrag={(...args) => {
+            const [, { x, y }] = args
+
+            setResizePosition({ x, y })
+            setIsResizing(true)
+            onResize && onResize(...args)
           }}
+          onStop={() => {
+            setResizePosition({ x: 0, y: 0 })
+            setIsResizing(false)
+          }}
+          grid={[itemWidth, itemHeight]}
         >
           <Box
-            component="img"
-            src={settingsIcon}
-            zIndex="5"
-            onClick={onToggleSettings}
-          ></Box>
-        </Box>
+            className="cancel"
+            position="absolute"
+            right={`${resizePosition.x}px`}
+            bottom={`${resizePosition.y}px`}
+            height={resizeSize}
+            width={resizeSize}
+            zIndex="100"
+            padding={'3px'}
+            sx={{
+              cursor: 'nwse-resize',
+            }}
+          >
+            <Box
+              src={resizeIcon}
+              component="img"
+              width="100%"
+              height="100%"
+              sx={{
+                userSelect: 'none',
+                pointerEvents: 'none',
+              }}
+            ></Box>
+          </Box>
+        </Draggable>
         {children}
       </Box>
     </Draggable>

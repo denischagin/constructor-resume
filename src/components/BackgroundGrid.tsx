@@ -23,7 +23,7 @@ const BackgroundGridComponent: FC<BackgroundGridProps> = (props) => {
     >
       {...Array.from({ length: fieldHeight * fieldWidth }).map(() => (
         <Box
-          sx={{ outline: '1px solid rgba(0, 0, 0, 0.2)' }}
+          sx={{ outline: '1px dashed rgba(0, 0, 0, 0.1)' }}
           width={`${itemWidth}px`}
           height={`${itemHeight}px`}
         ></Box>
