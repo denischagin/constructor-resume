@@ -3,7 +3,7 @@ import { FC, PropsWithChildren, useState } from 'react'
 import Draggable, { DraggableProps } from 'react-draggable'
 import settingsIcon from '../assets/svg/settings-icon.svg'
 
-export type Element1Props = {
+export type DragElementProps = {
   itemWidth: number
   itemHeight: number
   x: number
@@ -16,7 +16,7 @@ export type Element1Props = {
   isActive?: boolean
 } & PropsWithChildren
 
-export const DragElement: FC<Element1Props> = (props) => {
+export const DragElement: FC<DragElementProps> = (props) => {
   const {
     itemWidth,
     itemHeight,

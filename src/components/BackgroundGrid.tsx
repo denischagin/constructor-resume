@@ -1,5 +1,5 @@
 import { Box } from '@mui/material'
-import { FC } from 'react'
+import { FC, memo } from 'react'
 
 export type BackgroundGridProps = {
   itemWidth: number
@@ -8,7 +8,7 @@ export type BackgroundGridProps = {
   fieldHeight: number
 }
 
-export const BackgroundGrid: FC<BackgroundGridProps> = (props) => {
+const BackgroundGridComponent: FC<BackgroundGridProps> = (props) => {
   const { itemHeight, itemWidth, fieldHeight, fieldWidth } = props
 
   return (
@@ -21,7 +21,7 @@ export const BackgroundGrid: FC<BackgroundGridProps> = (props) => {
       width={itemWidth * fieldWidth}
       height={itemHeight * fieldHeight}
     >
-      {...Array.from({ length: (fieldHeight + 2) * fieldWidth }).map(() => (
+      {...Array.from({ length: fieldHeight * fieldWidth }).map(() => (
         <Box
           sx={{ outline: '1px solid rgba(0, 0, 0, 0.2)' }}
           width={`${itemWidth}px`}
@@ -31,3 +31,5 @@ export const BackgroundGrid: FC<BackgroundGridProps> = (props) => {
     </Box>
   )
 }
+
+export const BackgroundGrid = memo(BackgroundGridComponent)

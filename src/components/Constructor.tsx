@@ -50,8 +50,12 @@ export const Constructor = () => {
     newPosition: { x: number; y: number },
     item: DragItem,
   ) => {
-    const maxX = itemWidth * fieldWidth
-    const maxY = itemHeight * fieldHeight
+    const maxX =
+      itemWidth * fieldWidth - (item.countWidth ?? 1) * itemWidth - itemWidth
+    const maxY =
+      itemHeight * fieldHeight -
+      (item.countHeight ?? 1) * itemHeight -
+      itemHeight
 
     const minX = -itemWidth
     const minY = -itemHeight
@@ -63,6 +67,17 @@ export const Constructor = () => {
     const y = validatePoint(roundY, maxY, minY, item.y)
 
     changeItemValue(item.id, { x, y })
+  }
+
+  const handleDragStart = (item: DragItem) => {
+    setItems((prev) => {
+      const findedItemIndex = prev.findIndex((el) => item.id === el.id)
+      if (findedItemIndex === -1) return prev
+
+      const dragItem = prev[findedItemIndex]
+      prev.splice(findedItemIndex, 1)
+      return [...prev, dragItem]
+    })
   }
 
   const handleToggleSettings = (item: DragItem) => {
@@ -85,8 +100,6 @@ export const Constructor = () => {
 
       <Box
         width={`${itemWidth * itemsPerRow}px`}
-        display="flex"
-        flexWrap="wrap"
         position="absolute"
         left={itemWidth}
         top={itemHeight}
@@ -109,6 +122,9 @@ export const Constructor = () => {
             draggableProps={{
               onStop: (_, { x, y }) => {
                 handleDragEnd({ x, y }, item)
+              },
+              onStart: () => {
+                handleDragStart(item)
               },
             }}
             onToggleSettings={() => {
